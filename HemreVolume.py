@@ -69,6 +69,10 @@ class HermeVolum(BaseUnit):
         return self.t_list_air[-1]
 
 
+    def get_out(self):
+        return self.t_list_air[-1]
+
+
 class SplittedHermeVolume(SplittedBaseUnit):
 
     def __init__(self, n: int, l):
@@ -77,13 +81,12 @@ class SplittedHermeVolume(SplittedBaseUnit):
 
 
     def step(self, t_in, params):
+        old_q = params['q_go'] 
+        params['q_go'] /= self.n
         self.objs[0].update_params(params)
         self.objs[0].step(t_in)
         
         pred_obj = self.objs[0]
-
-        old_q = params['q_go'] 
-        params['q_go'] /= self.n
         for obj in self.objs[1:]:
             obj.update_params(params)
             obj.step(pred_obj.t_list_air[-1])
@@ -97,3 +100,7 @@ class SplittedHermeVolume(SplittedBaseUnit):
 
     def get_last_t(self):
         return [obj.t_list_air[-1] for obj in self.objs]
+
+    
+    def get_out(self):
+        return self.objs[-1].get_out()
