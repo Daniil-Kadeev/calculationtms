@@ -96,7 +96,6 @@ class Plotter():
         ax, fig = self.get_ax()
         surf = None
         cbar = None
-
         try:
             while True:
                 objects, time, params = yield
@@ -119,15 +118,11 @@ class Plotter():
                 
                 T, L = np.meshgrid(display_time, self.length)
 
-                # if cbar is not None:
-                #     cbar.remove()
-                #     cbar = None
-
                 surf = ax.plot_surface(
                     T, L, display_data,
                     cmap='plasma',
-                    rstride=1,
-                    cstride=1,
+                    rstride=params['rs'],
+                    cstride=params['cs'],
                     linewidth=0.1,
                     alpha=0.8,
                 )
@@ -138,14 +133,10 @@ class Plotter():
                     ax.relim()              # Обновляем лимиты данных
                     ax.autoscale_view(scalex=False, scaley=False, scalez=True)  # Применяем
                 else:
-                    # Устанавливаем ручные пределы
                     ax.set_zlim(min_, max_)
 
                 ax.set_xlim(display_time[0], display_time[-1])
-                # if cbar is None:
-                #     cbar = fig.colorbar(surf, ax=ax, pad=0.1)
-                #     cbar.set_label('Temperature (°C)', rotation=270, labelpad=15)
-            
+
                 plt.draw()
                 plt.gcf().canvas.flush_events()
         except KeyboardInterrupt:

@@ -6,12 +6,27 @@ import utils
 
 
 parameters = {}
-parameters['dt'] = 0.5
+parameters['dt'] = 1
 parameters['q_go'] = 2000
 parameters['speed'] = 1
-parameters['ws'] = 120
+parameters['ws'] = -1
 parameters['t_max'] = -1
 parameters['t_min'] = -1
+parameters['rs'] = 1
+parameters['cs'] = 100
+parameters['loop'] = True
+parameters['rule'] = 'sin'
+
+parameters['bias'] = 0
+parameters['A'] = 3000
+parameters['T'] = 50 # умножаем на 6 - получаем истинный период
+
+parameters['A2'] = 1500 
+parameters['T2'] = 100 / 10
+parameters['A3'] = 900
+parameters['T3'] = 10 / 10
+
+
 parameters_lock = threading.Lock()
 print_lock = threading.Lock()
 
@@ -37,7 +52,8 @@ def input_parameters():
                 sys.exit(0)
                 
             key, value = user_input.split(maxsplit=1)
-            value = float(value) if '.' in value else int(value)
+            if key != 'rule':
+                value = float(value) if '.' in value else int(value)
             
             with parameters_lock:
                 parameters[key] = value
