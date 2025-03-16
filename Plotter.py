@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from BaseUnit import BaseUnit, SplittedBaseUnit
-from HemreVolume import HermeVolum, SplittedHermeVolume
+from HermeVolume import HermeVolum, SplittedHermeVolume
 
 class Plotter():
 
@@ -50,6 +50,29 @@ class Plotter():
         return ax, fig
 
 
+    def plot2d(self, objects: List, time: List, heat: List=None):
+        fig = plt.figure(figsize=(6, 4))
+        ax = fig.add_subplot(1, 1, 1)
+
+        ax.set_xlabel('\nTime (seconds)', linespacing=2)
+        ax.set_ylabel('\nTemperature (°C)', linespacing=2)
+        ax.set_title('Temperature Distribution\n', fontsize=14)
+
+        self.temperature_data = []
+        num_elements = self.get_num_elements(objects)
+        temperature_data = self.from_list_into_array(self.temperature_data)
+
+        for temperature in temperature_data:
+            ax.plot(time, temperature)
+
+        if heat:
+            ax2 = ax.twinx()
+            ax2.plot(time, heat, color='red', linestyle='--', label='Heat')
+            ax2.set_ylabel('\nHeat (W)', linespacing=2, color='red')
+            ax2.tick_params(axis='y', labelcolor='red')
+        ax.grid()
+        plt.tight_layout()
+        plt.show()
 
     def plot3d(self, objects: List, time: List):
         self.temperature_data = []

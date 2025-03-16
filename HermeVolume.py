@@ -12,7 +12,7 @@ class HermeVolum(BaseUnit):
         g = 0.25 * 10
         ro_air = 1.2 * 1000
         cp_air = 1005 
-        alfa = 200
+        alfa = 200 * 10
         r = 1.5
         delta = 1/1000
 
@@ -31,20 +31,12 @@ class HermeVolum(BaseUnit):
         self.dt_list_air = [0, ]
         self.dt_list_st = [0, ]
 
-    
-    def step(self, t_in: float):
-        self.t_in = t_in
-        self.step_d()
-        self.step_t()
-        # print(self.dt_list_air[-1])
 
-    
-    def update_params(self, params):
+    def step_d(self, t_in: float, params):
         self.dt = params['dt']
         self.q = params['q_go']
+        self.t_in = t_in
 
-
-    def step_d(self):
         self.dt_list_air.append(self.equation_air())
         self.dt_list_st.append(self.equation_st())
 
@@ -55,8 +47,6 @@ class HermeVolum(BaseUnit):
 
     
     def equation_air(self):
-        # print(f'({self.alfa} * {self.f} * ({self.t_list_st[-1]} - {self.t_list_air[-1]}) + {self.CpG_air} * ({self.t_in} - {self.t_list_air[-1]}) + {self.q}) / {self.cm_air}')
-
         return (self.alfa * self.f * (self.t_list_st[-1] - self.t_list_air[-1]) + 
         self.CpG_air * (self.t_in - self.t_list_air[-1]) + self.q) / self.cm_air
 
@@ -77,6 +67,7 @@ class HermeVolum(BaseUnit):
         return self.t_list_air[-1]
 
 
+
 class SplittedHermeVolume(SplittedBaseUnit):
 
     def __init__(self, n: int, l):
@@ -87,12 +78,14 @@ class SplittedHermeVolume(SplittedBaseUnit):
     def step(self, t_in, params):
         old_q = params['q_go'] 
         params['q_go'] /= self.n
-        
+        i = 1
         self.objs[0].update_params(params)
         self.objs[0].step(t_in)
         # params['q_go'] = 0
         pred_obj = self.objs[0]
         for obj in self.objs[1:]:
+            i += 1
+            params['q_go'] /= self.n * i
             obj.update_params(params)
             obj.step(pred_obj.t_list_air[-1])
             pred_obj = obj
@@ -100,6 +93,24 @@ class SplittedHermeVolume(SplittedBaseUnit):
         #     print(obj.t_list_air[-1])
         # input()
         # params['q_go'] = old_q
+    def step_d(self, t_in, params):
+        old_q = params['q_go'] 
+        params['q_go'] /= self.n
+
+        self.objs[0].step_d(t_in, params)
+        pred_obj = self.objs[0]
+        for obj in self.objs[1:]:
+            obj.step_d(pred_obj.t_list_air[-1], params)
+            pred_obj = obj
+        params['q_go'] = old_q
+
+
+    def step_t(self):
+        self.objs[0].step_t()
+        pred_obj = self.objs[0]
+        for obj in self.objs[1:]:
+            obj.step_t()
+            pred_obj = obj
 
 
     def get_full_t(self):
