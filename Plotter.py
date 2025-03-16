@@ -67,7 +67,7 @@ class Plotter():
             cstride=2,             # Шаг сетки по длине
             linewidth=0.1,         # Толщина линий сетки
             antialiased=False,      # Сглаживание
-            alpha=0.8              # Прозрачность
+            # alpha=0.8              # Прозрачность
         )
 
         cbar = fig.colorbar(surf, ax=ax, pad=0.1)
@@ -96,6 +96,7 @@ class Plotter():
         ax, fig = self.get_ax()
         surf = None
         cbar = None
+        i = 0
         try:
             while True:
                 objects, time, params = yield
@@ -115,9 +116,9 @@ class Plotter():
                 
                 if surf is not None:
                     surf.remove()
-                
-                T, L = np.meshgrid(display_time, self.length)
 
+                T, L = np.meshgrid(display_time, self.length)
+                i += 1
                 surf = ax.plot_surface(
                     T, L, display_data,
                     cmap='plasma',

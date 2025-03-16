@@ -1,41 +1,19 @@
 from math import sin
 import time
 
+from HeatGenerator import HeatGenerator
 from HemreVolume import SplittedHermeVolume
 from Plotter import Plotter
 
 
-def get_sin():
-    t = 0
-    while True:
-        params = yield 
-        t += params['dt']
-        yield params['A'] * sin(t / params['T']) + params['bias']
 
-
-def get_sin2():
-    t = 0
-    while True:
-        params = yield 
-        t += params['dt']
-        yield (params['A'] * sin(t / params['T']) + params['bias'] + 
-        params['A2'] * sin(t / params['T2']) + params['bias'])
-
-
-def get_sin3():
-    t = 0
-    while True:
-        params = yield 
-        t += params['dt']
-        yield (params['A'] * sin(t / params['T']) + params['bias'] + 
-        params['A2'] * sin(t / params['T2']) + params['bias'] + 
-        params['A3'] * sin(t / params['T3']) + params['bias'])
 
 
 def calc_step():
-    my_sin = get_sin()
-    my_sin2 = get_sin2()
-    my_sin3 = get_sin3()
+    Generator = HeatGenerator()
+    my_sin = Generator.get_sin()
+    my_sin2 = Generator.get_sin2()
+    my_sin3 = Generator.get_sin3()
 
     my_sin.send(None)
     my_sin2.send(None)
@@ -55,12 +33,12 @@ def calc_step():
             params['q_go'] = my_sin3.send(params)
             next(my_sin3)
 
-        old_q = params['q_go']
+        # old_q = params['q_go']
         for obj in structure:
             # params['q_go'] *= -1
             obj.step(last.get_out(), params)
             last = obj
-        params['q_go'] = old_q    
+        # params['q_go'] = old_q    
 
 
 
@@ -69,8 +47,8 @@ def calc_animated():
     plotter.send(None)
 
     structure = (
-        SplittedHermeVolume(4, 2),
-        SplittedHermeVolume(4, 2),
+        SplittedHermeVolume(40, 2),
+        # SplittedHermeVolume(20, 2),
         # SplittedHermeVolume(3, 10),
         # SplittedHermeVolume(3, 10)
     )

@@ -9,8 +9,9 @@ from BaseUnit import BaseUnit, SplittedBaseUnit
 class HermeVolum(BaseUnit):
 
     def __init__(self, l):
-        g = 0.25
-        cp_air = 1005
+        g = 0.25 * 10
+        ro_air = 1.2 * 1000
+        cp_air = 1005 
         alfa = 200
         r = 1.5
         delta = 1/1000
@@ -18,7 +19,7 @@ class HermeVolum(BaseUnit):
         self.alfa = alfa
         self.f = math.pi * r * l
         self.CpG_air = cp_air * g
-        self.cm_air = cp_air * self.f / 2 * r
+        self.cm_air = ro_air * self.f / 2 * r
         self.cm_st = 920 * self.f * delta * 2700
 
         self.__init_start()
@@ -35,6 +36,7 @@ class HermeVolum(BaseUnit):
         self.t_in = t_in
         self.step_d()
         self.step_t()
+        # print(self.dt_list_air[-1])
 
     
     def update_params(self, params):
@@ -53,6 +55,8 @@ class HermeVolum(BaseUnit):
 
     
     def equation_air(self):
+        # print(f'({self.alfa} * {self.f} * ({self.t_list_st[-1]} - {self.t_list_air[-1]}) + {self.CpG_air} * ({self.t_in} - {self.t_list_air[-1]}) + {self.q}) / {self.cm_air}')
+
         return (self.alfa * self.f * (self.t_list_st[-1] - self.t_list_air[-1]) + 
         self.CpG_air * (self.t_in - self.t_list_air[-1]) + self.q) / self.cm_air
 
@@ -83,15 +87,19 @@ class SplittedHermeVolume(SplittedBaseUnit):
     def step(self, t_in, params):
         old_q = params['q_go'] 
         params['q_go'] /= self.n
+        
         self.objs[0].update_params(params)
         self.objs[0].step(t_in)
-        
+        # params['q_go'] = 0
         pred_obj = self.objs[0]
         for obj in self.objs[1:]:
             obj.update_params(params)
             obj.step(pred_obj.t_list_air[-1])
             pred_obj = obj
-        params['q_go'] = old_q
+        # for obj in self.objs:
+        #     print(obj.t_list_air[-1])
+        # input()
+        # params['q_go'] = old_q
 
 
     def get_full_t(self):
