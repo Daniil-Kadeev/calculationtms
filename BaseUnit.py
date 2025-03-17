@@ -8,10 +8,6 @@ class BaseUnit():
         raise NotImplementedError(f'В классе {self.__class__.__name__} не реализована функция {func_name}')
 
 
-    def step(self):
-        self.print_error('step')
-
-
     def step_d(self):
         self.print_error('step_d')
 

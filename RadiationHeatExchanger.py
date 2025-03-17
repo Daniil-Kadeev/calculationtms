@@ -1,32 +1,30 @@
-import math
-
 from BaseUnit import BaseUnit, SplittedBaseUnit
 
-
-class HermeVolum(BaseUnit):
-
+class RadiationHeatExchanger(BaseUnit):
+    
     def __init__(self, l):
         self.init_temp = 283.0
-        g = 0.25 * 10
-        ro_air = 1.2 * 1000
-        cp_air = 1005 
-        alfa = 200 * 10
-        r = 1.5
-        delta = 1/1000
+        self.cp_cold = 1850
+        self.g_cold = 1.081
+        self.t_cold_inp = 288
+        self.alfa_cold = 386.752
+        self.f_cold = 6.009
+        self.m_cold = 1.081
 
-        self.alfa = alfa
-        self.f = math.pi * r * l
-        self.CpG_air = cp_air * g
-        self.cm_air = ro_air * self.f / 2 * r
-        self.cm_st = 920 * self.f * delta * 2700
+        self.etta = 1
+        self.eps = 1
+        self.sig = 5.67 * 10 ** -8
+        self.f_st = 6
+        self.a = 1
+        self.q = 200
 
         self.__init_start()
 
 
     def __init_start(self):
-        self.t_list_air = [self.init_temp, ]
+        self.t_list_liq = [self.init_temp, ]
         self.t_list_st = [self.init_temp, ]
-        self.dt_list_air = [0, ]
+        self.dt_list_liq = [0, ]
         self.dt_list_st = [0, ]
 
 
@@ -35,34 +33,36 @@ class HermeVolum(BaseUnit):
         self.q = params['q_go']
         self.t_in = t_in
 
-        self.dt_list_air.append(self.equation_air())
+        self.dt_list_liq.append(self.equation_liq())
         self.dt_list_st.append(self.equation_st())
 
 
     def step_t(self):
-        self.update_t(self.t_list_air, self.dt_list_air, self.dt)
+        self.update_t(self.t_list_liq, self.dt_list_liq, self.dt)
         self.update_t(self.t_list_st, self.dt_list_st, self.dt)
 
     
-    def equation_air(self):
-        return (self.alfa * self.f * (self.t_list_st[-1] - self.t_list_air[-1]) + 
-        self.CpG_air * (self.t_in - self.t_list_air[-1]) + self.q) / self.cm_air
+    def equation_liq(self):
+        return (self.alfa * self.f * (self.t_list_st[-1] - self.t_list_liq[-1]) + 
+        self.CpG_air * (self.t_in - self.t_list_liq[-1]) + self.q) / self.cm_air
 
     
     def equation_st(self):
-        return (self.alfa * self.f * (self.t_list_air[-1] - self.t_list_st[-1])) / self.cm_st
+        return (self.alfa * self.f * (self.t_list_liq[-1] - self.t_list_st[-1]) - 
+        self.etta * self.eps * self.sig * self.t_list_st[-1] ** 4 * self.f_st + 
+        self.a * self.q * self.f_st) / self.cm_st
     
 
     def get_full_t(self):
-        return self.t_list_air
+        return self.t_list_liq
 
     
     def get_last_t(self):
-        return self.t_list_air[-1]
+        return self.t_list_liq[-1]
 
 
     def get_out(self):
-        return self.t_list_air[-1]
+        return self.t_list_liq[-1]
 
 
 

@@ -1,4 +1,5 @@
 from HermeVolume import *
+from HeatExchanger import HeatExchanger
 import test_animated
 import utils
 import HeatGenerator
@@ -6,16 +7,20 @@ import Plotter
 
 
 parameters = {}
+parameters['clear'] = 'False'
+parameters['step'] = 30
+parameters['stop'] = 'False'
+parameters['plot'] = 'True'
 parameters['inventor'] = 1 # инвентирует подводимое тепло для каждого объекта структуры
 parameters['input'] = 'True'      # есть ли вход? Если False - структура закольцована сама на себя
-parameters['dt'] = 0.4
-parameters['q_go'] = 1000        # генерация тепла в начальный момент (после применения rule, этот параметр остаётся последним значением из rule)
+parameters['dt'] = 0.05
+parameters['q_go'] = 0        # генерация тепла в начальный момент (после применения rule, этот параметр остаётся последним значением из rule)
 parameters['speed'] = 1     # устарело
-parameters['ws'] = 100      # сколько последних тактов отображать
+parameters['ws'] = -1      # сколько последних тактов отображать
 parameters['t_max'] = 296
 parameters['t_min'] = 290
-parameters['rs'] = 1        # частокол по длине структуры
-parameters['cs'] = 10      # частоокол по времени
+parameters['rs'] = 2        # частокол по длине структуры
+parameters['cs'] = 100      # частоокол по времени
 parameters['loop'] = 'True'
 parameters['rule'] = 'sin_1'  # sin_1, sin_2, sin_3, any
 
@@ -35,11 +40,12 @@ def test_2d(structure, plotter, generator):
     heat = []
     t_lim = 100
     dt = parameters['dt']
+    deq = []
 
     while t < t_lim:
         t += dt
         t_list.append(t)
-        utils.calc(structure, generator, parameters)
+        utils.calc(structure, generator, parameters, deq)
         heat.append(parameters['q_go'])
     heat.append(parameters['q_go'])
     plotter.plot2d(structure, t_list, heat)
@@ -55,18 +61,18 @@ def test_3d(structure, plotter, generator):
     heat = []
     t_lim = 100
     dt = parameters['dt']
+    deq = []
 
     while t < t_lim:
         t += dt
         t_list.append(t)
-        utils.calc(structure, generator, parameters)
+        utils.calc(structure, generator, parameters, deq)
         heat.append(parameters['q_go'])
     heat.append(parameters['q_go'])
-    plotter.plot3d(structure, t_list)
+    plotter.plot3d(structure, t_list, parameters)
 
 
 def test_3d_animated(structure, plotter, generator):
-    print(parameters)
     test_animated.start(structure, parameters)
 
 
@@ -119,6 +125,7 @@ def fast_test():
         new_temp_air = temperatures_air[-1] + dt_air * shag
         new_temp_liq = temperatures_liq[-1] + dt_liq * shag
         new_temp_wall = temperatures_wall[-1] + dt_wall * shag
+        # input((new_temp_air, new_temp_liq, new_temp_wall))
 
         # Добавление новых значений в массивы
         temperatures_air.append(new_temp_air)
@@ -132,7 +139,7 @@ def fast_test():
 
 # fast_test()
 
-num = 1
+
 test = 2
 tests = {
     2: test_2d,
@@ -141,15 +148,19 @@ tests = {
     30: test_3d_animated
 }
 
+structure = 4
 structures = {
     0: (HermeVolum(2), ),
-    1: (SplittedHermeVolume(5, 2), ),
+    1: (SplittedHermeVolume(50, 2), ),
     2: (
         SplittedHermeVolume(5, 2),
         SplittedHermeVolume(5, 2),
-    )
+    ),
+
+    3: (HeatExchanger(), ),
+    4: (HeatExchanger('liq_liq'), )
 }
 
 plotter = Plotter.Plotter()
 generator = HeatGenerator.HeatGenerator()
-tests[test](structures[num], plotter, generator)
+tests[test](structures[structure], plotter, generator)

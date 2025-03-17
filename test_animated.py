@@ -41,15 +41,14 @@ def calculation(structure, parameters):
     while True:
         with parameters_lock:
             params = parameters.copy()
-        # print('calculation  ' + (params['inventor']))
         calc.send(params)
 
 
 def input_parameters(parameters):
     while True:
         with print_lock:
-            sys.stdout.write('\x1b[2;0H')
-            sys.stdout.write('\x1b[2K')
+            # sys.stdout.write('\x1b[2;0H')
+            # sys.stdout.write('\x1b[2K')
             user_input = input('Введите параметр: ')
        
         try:
@@ -63,7 +62,7 @@ def input_parameters(parameters):
                     with parameters_lock:
                         json.dump(parameters, f, ensure_ascii=False, indent=4)
                 continue
-            elif key.lower() not in ['rule', 'loop', 'input']:
+            if key.lower() not in ['rule', 'loop', 'input', 'stop', 'plot']:
                 value = float(value) if '.' in value else int(value)
             
             with parameters_lock:

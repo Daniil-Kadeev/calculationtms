@@ -5,11 +5,15 @@ import numpy as np
 
 from BaseUnit import BaseUnit, SplittedBaseUnit
 from HermeVolume import HermeVolum, SplittedHermeVolume
+from support_class import Flatten
+
 
 class Plotter():
 
     def __init__(self):
         self.first = True
+        self.flatten = Flatten()
+        self.counter = 0
 
 
     def get_last_t(self, objects):
@@ -35,7 +39,8 @@ class Plotter():
 
     
     def from_list_into_array(self, lst):
-        return np.array(list(map(np.array, lst)))
+        return np.array(lst, dtype=np.float32)
+        # return np.array(list(map(np.array, lst)))
 
 
     def get_ax(self):
@@ -60,37 +65,46 @@ class Plotter():
 
         self.temperature_data = []
         num_elements = self.get_num_elements(objects)
-        temperature_data = self.from_list_into_array(self.temperature_data)
-
-        for temperature in temperature_data:
-            ax.plot(time, temperature)
+        self.temperature_data = self.from_list_into_array(self.temperature_data)
+        
+        for temperature in self.temperature_data:
+            for t in self.flatten.start(temperature):
+                ax.plot(time, t)
 
         if heat:
             ax2 = ax.twinx()
             ax2.plot(time, heat, color='red', linestyle='--', label='Heat')
             ax2.set_ylabel('\nHeat (W)', linespacing=2, color='red')
             ax2.tick_params(axis='y', labelcolor='red')
+
         ax.grid()
         plt.tight_layout()
         plt.show()
 
-    def plot3d(self, objects: List, time: List):
-        self.temperature_data = []
-        num_elements = self.get_num_elements(objects)
-        temperature_data = self.from_list_into_array(self.temperature_data)
 
-        length = np.arange(num_elements)
-        T, L = np.meshgrid(time, length)
-
+    def plot3d(self, objects: List, time: List, params):
         ax, fig = self.get_ax()
+        self.start(objects)
+        long = self.temperature_data.shape[1]
+        end_idx = long
+        window_size = params['ws']
+        if window_size == -1:
+            start_idx = 0
+        else:
+            start_idx = max(0, long - window_size)
+
+        display_data = self.temperature_data[:, start_idx:end_idx]
+        display_time = time[start_idx:end_idx]
+
+        T, L = np.meshgrid(display_time, self.length)
+        print(params['cs'])
         surf = ax.plot_surface(
-            T, L, temperature_data,
-            cmap='plasma',         # Цветовая схема
-            rstride=1,             # Шаг сетки по времени
-            cstride=2,             # Шаг сетки по длине
-            linewidth=0.1,         # Толщина линий сетки
-            antialiased=False,      # Сглаживание
-            # alpha=0.8              # Прозрачность
+            T, L, display_data,
+            cmap='plasma',
+            rstride=params['rs'],
+            cstride=params['cs'],
+            linewidth=0.1,
+            alpha=0.8,
         )
 
         cbar = fig.colorbar(surf, ax=ax, pad=0.1)
@@ -119,13 +133,20 @@ class Plotter():
         ax, fig = self.get_ax()
         surf = None
         cbar = None
-        i = 0
         try:
             while True:
                 objects, time, params = yield
-                if self.first: self.start(objects)
-                else: self.add_data(objects)
-            
+                if self.first or params['clear'] == 'True': 
+                    self.start(objects)
+                    params['clear'] = 'False'
+                else: 
+                    self.add_data(objects)
+                self.counter += 1
+
+                if params['plot'] == 'False':
+                    continue
+                if not (params['step'] != 0 and self.counter % params['step'] == 0):
+                    continue
                 long = self.temperature_data.shape[1]
                 end_idx = long
                 window_size = params['ws']
@@ -141,7 +162,6 @@ class Plotter():
                     surf.remove()
 
                 T, L = np.meshgrid(display_time, self.length)
-                i += 1
                 surf = ax.plot_surface(
                     T, L, display_data,
                     cmap='plasma',
