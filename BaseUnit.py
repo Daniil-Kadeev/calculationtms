@@ -27,8 +27,13 @@ class BaseUnit():
     def get_last_t(self):
         self.print_error('get_last_t')
     
+
     def get_out(self):
         self.print_error('get_out')
+
+    
+    def get_st(self):
+        return self.t_list_st
 
 
 class SplittedBaseUnit():

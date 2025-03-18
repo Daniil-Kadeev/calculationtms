@@ -26,38 +26,32 @@ class HeatExchanger(BaseUnit):
         self.g_hot_main = 2.487
         self.cp_hot = 1005
         self.g_hot = 2.487
-        self.t_hot_inp = 301
         self.alfa_hot = 457.489
         self.f_hot = 16.20183
-        self.m_hot = 2.487 # Преобразование в кг/ч? (если G_hot в тоннах)
+        self.m_hot = 2.487 
 
-        # Параметры жидкости
         self.g_cold_main = 1.081
         self.cp_cold = 1850
         self.g_cold = 1.081
-        self.t_cold_inp = 288
         self.alfa_cold = 386.752
         self.f_cold = 6.009
-        self.m_cold = 1.081 # Исправлено на G_cold
+        self.m_cold = 1.081 
 
 
     def start_liq_liq(self):
         self.g_hot_main = 1.081
         self.cp_hot = 1850
         self.g_hot = 1.081
-        self.t_hot_inp = 288
         self.alfa_hot = 386.752
         self.f_hot = 6.009
         self.m_hot = 0.93
-        # Параметры жидкости
 
         self.g_cold_main = 1.081
         self.cp_cold = 1850
         self.g_cold = 1.081
-        self.t_cold_inp = 288
         self.alfa_cold = 386.752
         self.f_cold = 6.009
-        self.m_cold = 0.93 # Исправлено на G_cold
+        self.m_cold = 0.93 
 
 
     def __init_start(self):
@@ -86,12 +80,20 @@ class HeatExchanger(BaseUnit):
 
     
     def equation_hot(self):
+        # print('liq hot')
+        # print((self.cp_hot * self.g_hot * (self.t_in_hot - self.t_list_hot[-1]) 
+        #         + self.alfa_hot * self.f_hot * (self.t_list_st[-1] - self.t_list_hot[-1])
+        #         ))
         return (self.cp_hot * self.g_hot * (self.t_in_hot - self.t_list_hot[-1]) 
                 + self.alfa_hot * self.f_hot * (self.t_list_st[-1] - self.t_list_hot[-1])
                 ) / (self.cp_hot * self.m_hot)
     
 
     def equation_cold(self):
+        # print('liq cold')
+        # print((self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
+        #         + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
+        #         ))
         return (self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
                 + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
                 ) / (self.cp_cold * self.m_cold)

@@ -11,13 +11,13 @@ class Regulator(BaseUnit):
         self.init_posn = 0
         self.pos_list = [self.init_posn]
         self.d_pos_list = [0]
-        self.insens = 5
+        self.insens = 1
 
 
     def step_d(self, t_in: List, params):
         self.dt = params['dt']
         self.t_reg = params['t_regul']
-        self.t_in=  t_in
+        self.t_in = t_in
 
         self.d_pos_list.append(self.equation_pos())
 
@@ -45,6 +45,10 @@ class Regulator(BaseUnit):
     
     def get_full_t(self):
         return self.pos_list
+    
+
+    def get_speed(self):
+        return self.d_pos_list
 
     
     def get_last_t(self):

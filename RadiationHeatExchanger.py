@@ -7,7 +7,7 @@ class RadiationHeatExchanger(BaseUnit):
 
         self.g_cold_main = 1.081
         self.cp_cold = 1850
-        self.g_cold = 1.081 * 1.26
+        self.g_cold = 1.081
         self.t_cold_inp = 288
         self.alfa_cold = 386.752
         self.f_cold = 6.009
@@ -49,6 +49,10 @@ class RadiationHeatExchanger(BaseUnit):
 
     
     def equation_liq(self):
+        # print('rto')
+        # print((self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
+        #         + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
+        #         ))
         return (self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
                 + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
                 ) / (self.cp_cold * self.m_cold)
@@ -56,9 +60,9 @@ class RadiationHeatExchanger(BaseUnit):
     
     def equation_st(self):
         # print(f'({self.alfa_cold} * {self.f_st} * ({self.t_list_cold[-1]} - {self.t_list_st[-1]}) - {self.etta} * {self.eps} * {self.sig} * {self.t_list_st[-1]} ** 4 * {self.f} + {self.a} * {self.q} * {self.f}) / ({self.c_st} * {self.m_st})')
-        # input(((self.alfa_cold * self.f_st * (self.t_list_cold[-1] - self.t_list_st[-1]) - 
+        # print(((self.alfa_cold * self.f_st * (self.t_list_cold[-1] - self.t_list_st[-1]) - 
         # self.etta * self.eps * self.sig * self.t_list_st[-1] ** 4 * self.f + 
-        # self.a * self.q * self.f) / (self.c_st * self.m_st)))
+        # self.a * self.q * self.f) ))
         
         return (self.alfa_cold * self.f_st * (self.t_list_cold[-1] - self.t_list_st[-1]) - 
         self.etta * self.eps * self.sig * self.t_list_st[-1] ** 4 * self.f + 

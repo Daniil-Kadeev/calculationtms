@@ -16,7 +16,7 @@ def calc_step_d(structure, generator, params, deq):
         last = structure[-1]
 
     for obj in structure:
-        obj.step_d(params['q'], params)
+        obj.step_d(last.get_out(), params)
         last = obj
 
 

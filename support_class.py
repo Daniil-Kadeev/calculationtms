@@ -32,7 +32,7 @@ class Flatten():
 
 
     def flatten_lists(self, massive):
-        if type(massive[0]) == numpy.float16 or type(massive[0]) == numpy.float32 or type(massive[0]) == numpy.float64 or  type(massive[0]) == float: 
+        if type(massive[0]) == numpy.float16 or type(massive[0]) == numpy.float32 or type(massive[0]) == numpy.float64 or  type(massive[0]) == float or type(massive[0]) == int: 
             self.flatten_massive.append(massive)
             return
         for obj in massive:

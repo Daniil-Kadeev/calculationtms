@@ -79,7 +79,7 @@ class Plotter():
             for t in self.flatten.start(temperature):
                 ax.plot(time, t)
 
-        if type(heat[0]) != list and heat != None:
+        if heat != None and type(heat[0]) != list:
             ax2 = ax.twinx()
             ax2.plot(time, heat, color='red', linestyle='--', label='Heat')
             ax2.set_ylabel('\nHeat (W)', linespacing=2, color='red')

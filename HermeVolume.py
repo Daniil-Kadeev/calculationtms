@@ -7,10 +7,10 @@ class HermeVolum(BaseUnit):
 
     def __init__(self, l):
         self.init_temp = 283.0
-        g = 0.25 * 10
-        ro_air = 1.2 * 1000
+        g = 2.487
+        ro_air = 1.2
         cp_air = 1005 
-        alfa = 200 * 10
+        alfa = 200
         r = 1.5
         delta = 1/1000
 
@@ -43,8 +43,15 @@ class HermeVolum(BaseUnit):
         self.update_t(self.t_list_air, self.dt_list_air, self.dt)
         self.update_t(self.t_list_st, self.dt_list_st, self.dt)
 
+        # print('herme')
+        # print(self.t_list_air[-1])
+
     
     def equation_air(self):
+        # print('Herme')
+        # print((self.alfa * self.f * (self.t_list_st[-1] - self.t_list_air[-1]) + 
+        # self.CpG_air * (self.t_in - self.t_list_air[-1]) + self.q))
+
         return (self.alfa * self.f * (self.t_list_st[-1] - self.t_list_air[-1]) + 
         self.CpG_air * (self.t_in - self.t_list_air[-1]) + self.q) / self.cm_air
 
