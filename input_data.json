@@ -1,5 +1,5 @@
 {
-    "herme_init_temp": "283.0",
+    "herme_init_temp": "292.0",
     "herme_g": "0.2487 * 10",
     "herme_ro_air": "1.2 * 100",
     "herme_cp_air": "1005",
@@ -9,7 +9,7 @@
 
     "exchanger_c_st": "2700",
     "exchanger_m_st": "5",
-    "exchanger_init_temp": "283.0",
+    "exchanger_init_temp": "290.0",
 
     "gas_liq_exchanger_g_hot_main": "0.2487",
     "gas_liq_exchanger_cp_hot": "1005",
@@ -37,7 +37,7 @@
     "liq_liq_exchanger_f_cold": "6.009",
     "liq_liq_exchanger_m_cold": "0.93",
 
-    "rto_init_temp": "283.0",
+    "rto_init_temp": "290.0",
     "rto_g_cold_main": "1.081",
     "rto_cp_cold": "1850",
     "rto_g_cold": "1.081",
@@ -53,8 +53,7 @@
     "rto_m_st": "5",
 
     "regulator_b": "1 / 15",
-    "regulator_p": "2",
-    "regulator_init_posn": "0",
-    "regulator_insens": "5",
+    "regulator_init_posn": "1",
+    "regulator_insens": "1",
     "regulator_t_regul": "293"
 }

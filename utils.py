@@ -9,7 +9,6 @@ from support_class import Dummy, Flatten
 from multistruct import Multistructure
 
 
-
 def calc_step_d(structure, generator, params, deq):
     if params['input'] == 'True':
         last = Dummy(structure[0])

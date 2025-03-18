@@ -55,7 +55,7 @@ parameters['A'] = 340
 parameters['T'] = 3600
 
 parameters['A1'] = 340
-parameters['T1'] = 3600 
+parameters['T1'] = 900 
 
 parameters['A2'] = 1500 
 parameters['T2'] = 3
@@ -114,7 +114,7 @@ def test_multistruct_2d(structure, plotter, generator):
     t_list = [t, ]
     heat_q_go = []
     heat_q = []
-    t_lim = 2000
+    t_lim = 10000
     dt = parameters['dt']
     deq = []
  
@@ -127,7 +127,7 @@ def test_multistruct_2d(structure, plotter, generator):
         
     heat_q_go.append(parameters['q_go'])
     heat_q.append(parameters['q'])
-    structure.calc_print()
+    # structure.calc_print()
     structure.get_data_xls([heat_q_go, heat_q], t_list, step=50)
     plotter.plot2d(structure.get_structure(), t_list)
 
