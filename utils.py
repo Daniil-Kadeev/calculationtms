@@ -16,7 +16,7 @@ def calc_step_d(structure, generator, params, deq):
         last = structure[-1]
 
     for obj in structure:
-        obj.step_d(last.get_out(), params)
+        obj.step_d(params['q'], params)
         last = obj
 
 
@@ -73,14 +73,3 @@ def calc_animated(structure, generator):
             t_list,
             params
         ))
-        # if type(structure) == tuple:
-        #     calc_step_d(structure, generator, params, deq)
-        #     calc_step_t(structure)
-        #     plotter.send((structure, t_list, params))
-        # else:
-        #     structure.step_d(params)
-        #     structure.step_t()
-        #     plotter.send((structure.get_structure(), t_list, params))
-
-
-# print((386.752 * 0.3 * (283.0 - 283.0) - 0.95 * 0.95 * 5.67e-08 * 283.0 ** 4 * 1.0 + 0.05 * 1083.3333333333333 * 1.0) / (2700 * 5))

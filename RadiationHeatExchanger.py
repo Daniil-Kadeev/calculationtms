@@ -4,6 +4,8 @@ class RadiationHeatExchanger(BaseUnit):
     
     def __init__(self, l):
         self.init_temp = 283.0
+
+        self.g_cold_main = 1.081
         self.cp_cold = 1850
         self.g_cold = 1.081 * 1.26
         self.t_cold_inp = 288

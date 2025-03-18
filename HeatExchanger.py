@@ -23,6 +23,7 @@ class HeatExchanger(BaseUnit):
 
 
     def start_gas_liq(self):
+        self.g_hot_main = 2.487
         self.cp_hot = 1005
         self.g_hot = 2.487
         self.t_hot_inp = 301
@@ -31,6 +32,7 @@ class HeatExchanger(BaseUnit):
         self.m_hot = 2.487 # Преобразование в кг/ч? (если G_hot в тоннах)
 
         # Параметры жидкости
+        self.g_cold_main = 1.081
         self.cp_cold = 1850
         self.g_cold = 1.081
         self.t_cold_inp = 288
@@ -40,6 +42,7 @@ class HeatExchanger(BaseUnit):
 
 
     def start_liq_liq(self):
+        self.g_hot_main = 1.081
         self.cp_hot = 1850
         self.g_hot = 1.081
         self.t_hot_inp = 288
@@ -47,6 +50,8 @@ class HeatExchanger(BaseUnit):
         self.f_hot = 6.009
         self.m_hot = 0.93
         # Параметры жидкости
+
+        self.g_cold_main = 1.081
         self.cp_cold = 1850
         self.g_cold = 1.081
         self.t_cold_inp = 288

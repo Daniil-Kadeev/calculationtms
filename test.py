@@ -6,6 +6,7 @@ import utils
 import HeatGenerator
 import Plotter
 from multistruct import Multistructure
+from regulator import Regulator
 
 
 parameters = {}
@@ -26,12 +27,12 @@ parameters['rs'] = 1        # частокол по длине структур�
 parameters['cs'] = 100      # частоокол по времени
 parameters['loop'] = 'True' # устарел
 parameters['rule'] = 'sin_1'  # sin_1, sin_2, sin_3, orbit, any rule - устарел, теперь rule_q and rule_q_gi
-parameters['rule_q'] = 'orbit'
+parameters['rule_q'] = 'sin_1'
 parameters['rule_q_go'] = '0'
 
-parameters['bias'] = 6500
-parameters['A'] = 2000
-parameters['T'] = 5
+parameters['bias'] = 293
+parameters['A'] = 10
+parameters['T'] = 3600
 
 parameters['A1'] = 340 * 25
 parameters['T1'] = 3600 / 20
@@ -40,6 +41,8 @@ parameters['A2'] = 1500
 parameters['T2'] = 3
 parameters['A3'] = 900
 parameters['T3'] = 1
+
+parameters['t_regul'] = 293
 
 
 def test_2d(structure, plotter, generator):
@@ -59,7 +62,7 @@ def test_2d(structure, plotter, generator):
         heat_q.append(parameters['q'])
     heat_q_go.append(parameters['q_go'])
     heat_q.append(parameters['q'])
-    plotter.plot2d(structure, t_list, [heat_q_go, heat_q])
+    plotter.plot2d(structure, t_list, [ heat_q])
 
 
 def test_2d_animated(structure, plotter, generator):
@@ -124,7 +127,7 @@ def test_multistruct_3d(structure, plotter, generator):
     plotter.plot3d(structure.get_structure(), t_list, parameters)
 
 
-test = 30
+test = 2
 tests = {
     2: test_2d,
     20: test_2d_animated,
@@ -134,10 +137,12 @@ tests = {
     5: test_multistruct_3d
 }
 
-structure = 9
+structure = -1
 structures = {
+    -1: (Regulator(),),
     0: (HermeVolum(2), ),
     1: (SplittedHermeVolume(50, 2), ),
+
     2: (
         SplittedHermeVolume(5, 2),
         SplittedHermeVolume(5, 2),
@@ -147,8 +152,17 @@ structures = {
     4: (HeatExchanger('liq_liq'), ),
     5: (RadiationHeatExchanger(6), ),
     6: (SplittedRadiationHeatExchanger(12, 6), ),
-    7: (HermeVolum(2), RadiationHeatExchanger(1),),
-    8: (SplittedHermeVolume(10, 2), SplittedRadiationHeatExchanger(10, 6),),
+
+    7: (
+        HermeVolum(2), 
+        RadiationHeatExchanger(1),
+    ),
+
+    8: (
+        SplittedHermeVolume(10, 2), 
+        SplittedRadiationHeatExchanger(10, 6),
+    ),
+
     9: Multistructure()
 }
 
