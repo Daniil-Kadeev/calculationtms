@@ -1,32 +1,40 @@
 from HermeVolume import *
+from RadiationHeatExchanger import *
 from HeatExchanger import HeatExchanger
 import test_animated
 import utils
 import HeatGenerator
 import Plotter
+from multistruct import Multistructure
 
 
 parameters = {}
-parameters['clear'] = 'False'
-parameters['step'] = 30
-parameters['stop'] = 'False'
-parameters['plot'] = 'True'
+parameters['clear'] = 'False' # не работает, нужно продумать логику изменения
+parameters['step'] = 30         # отрисовывает график раз в n шагов
+parameters['stop'] = 'False'    # останавливает счёт
+parameters['plot'] = 'True'     # останавливает отрисовку графика
 parameters['inventor'] = 1 # инвентирует подводимое тепло для каждого объекта структуры
 parameters['input'] = 'True'      # есть ли вход? Если False - структура закольцована сама на себя
 parameters['dt'] = 0.05
-parameters['q_go'] = 0        # генерация тепла в начальный момент (после применения rule, этот параметр остаётся последним значением из rule)
+parameters['q_go'] = 10000      # генерация тепла в начальный момент (после применения rule, этот параметр остаётся последним значением из rule)
+parameters['q'] = 2000 
 parameters['speed'] = 1     # устарело
 parameters['ws'] = -1      # сколько последних тактов отображать
-parameters['t_max'] = 296
+parameters['t_max'] = -1
 parameters['t_min'] = 290
-parameters['rs'] = 2        # частокол по длине структуры
+parameters['rs'] = 1        # частокол по длине структуры
 parameters['cs'] = 100      # частоокол по времени
-parameters['loop'] = 'True'
-parameters['rule'] = 'sin_1'  # sin_1, sin_2, sin_3, any
+parameters['loop'] = 'True' # устарел
+parameters['rule'] = 'sin_1'  # sin_1, sin_2, sin_3, orbit, any rule - устарел, теперь rule_q and rule_q_gi
+parameters['rule_q'] = 'orbit'
+parameters['rule_q_go'] = '0'
 
-parameters['bias'] = 0
-parameters['A'] = 3000
-parameters['T'] = 8 # умножаем на 6 - получаем истинный период
+parameters['bias'] = 6500
+parameters['A'] = 2000
+parameters['T'] = 5
+
+parameters['A1'] = 340 * 25
+parameters['T1'] = 3600 / 20
 
 parameters['A2'] = 1500 
 parameters['T2'] = 3
@@ -37,8 +45,9 @@ parameters['T3'] = 1
 def test_2d(structure, plotter, generator):
     t = 0
     t_list = [t, ]
-    heat = []
-    t_lim = 100
+    heat_q_go = []
+    heat_q = []
+    t_lim = 7200
     dt = parameters['dt']
     deq = []
 
@@ -46,9 +55,11 @@ def test_2d(structure, plotter, generator):
         t += dt
         t_list.append(t)
         utils.calc(structure, generator, parameters, deq)
-        heat.append(parameters['q_go'])
-    heat.append(parameters['q_go'])
-    plotter.plot2d(structure, t_list, heat)
+        heat_q_go.append(parameters['q_go'])
+        heat_q.append(parameters['q'])
+    heat_q_go.append(parameters['q_go'])
+    heat_q.append(parameters['q'])
+    plotter.plot2d(structure, t_list, [heat_q_go, heat_q])
 
 
 def test_2d_animated(structure, plotter, generator):
@@ -73,82 +84,57 @@ def test_3d(structure, plotter, generator):
 
 
 def test_3d_animated(structure, plotter, generator):
-    test_animated.start(structure, parameters)
+    test_animated.start(structure, parameters, generator)
 
 
-def fast_test():
-    time = 0.0  # секунды
-    shag = 0.05  # секунды
-    init_temp = 283.0
+def test_multistruct_2d(structure, plotter, generator):
+    t = 0
+    t_list = [t, ]
+    heat_q_go = []
+    heat_q = []
+    t_lim = 1000
+    dt = parameters['dt']
+    deq = []
 
-    # Параметры воздуха
-    cp_air = 1005
-    g_air = 2.487
-    t_air_inp = 301
-    alfa_air = 457.489
-    f_air = 5
-    m_air = g_air # Преобразование в кг/ч? (если G_air в тоннах)
-
-    # Инициализация массивов
-    temperatures_air = [init_temp]
-    temperatures_liq = [init_temp]
-    temperatures_wall = [init_temp]
-    all_time = [time]
-
-    # Параметры жидкости
-    cp_liq = 1850
-    g_liq = 1.081
-    t_liq_inp = 288
-    alfa_liq = 386.752
-    f_liq = 6.009
-    m_liq = 0.93 # Исправлено на G_liq
-
-    # Параметры стенки
-    c_wall = 2700
-    m_wall = 5
-
-    while time <= 100:
-        # Текущие температуры из предыдущего шага
-        t_air_out = temperatures_air[-1]
-        t_liq_out = temperatures_liq[-1]
-        t_wall = temperatures_wall[-1]
-
-        # Расчет производных
-        dt_air = (cp_air * g_air * (t_air_inp - t_air_out) + alfa_air * f_air * (t_wall - t_air_out)) / (cp_air * m_air)
-        dt_liq = (cp_liq * g_liq * (t_liq_inp - t_liq_out) + alfa_liq * f_liq * (t_wall - t_liq_out)) / (cp_liq * m_liq)
-        dt_wall = (alfa_air * f_air * (t_air_out - t_wall) + alfa_liq * f_liq * (t_liq_out - t_wall)) / (c_wall * m_wall)
-
-        # Обновление времени
-        time += shag
-
-        # Расчет новых температур
-        new_temp_air = temperatures_air[-1] + dt_air * shag
-        new_temp_liq = temperatures_liq[-1] + dt_liq * shag
-        new_temp_wall = temperatures_wall[-1] + dt_wall * shag
-        # input((new_temp_air, new_temp_liq, new_temp_wall))
-
-        # Добавление новых значений в массивы
-        temperatures_air.append(new_temp_air)
-        temperatures_liq.append(new_temp_liq)
-        temperatures_wall.append(new_temp_wall)
-        all_time.append(time)
-    plt.plot(all_time, temperatures_air)
-    plt.plot(all_time, temperatures_wall)
-    plt.grid()
-    plt.show()
-
-# fast_test()
+    while t < t_lim:
+        t += dt
+        t_list.append(t)
+        utils.calc_multistruct(structure, generator, parameters, deq)
+        heat_q_go.append(parameters['q_go'])
+        heat_q.append(parameters['q'])
+    heat_q_go.append(parameters['q_go'])
+    heat_q.append(parameters['q'])
+    plotter.plot2d(structure.get_structure(), t_list, [heat_q_go, heat_q])
 
 
-test = 2
+def test_multistruct_3d(structure, plotter, generator):
+    t = 0
+    t_list = [t, ]
+    heat = []
+    t_lim = 100
+    dt = parameters['dt']
+    deq = []
+
+    while t < t_lim:
+        t += dt
+        t_list.append(t)
+        utils.calc_multistruct(structure, generator, parameters, deq)
+        heat.append(parameters['q_go'])
+    heat.append(parameters['q_go'])
+    plotter.plot3d(structure.get_structure(), t_list, parameters)
+
+
+test = 30
 tests = {
     2: test_2d,
     20: test_2d_animated,
     3: test_3d,
-    30: test_3d_animated
+    30: test_3d_animated,
+    4: test_multistruct_2d,
+    5: test_multistruct_3d
 }
 
-structure = 4
+structure = 9
 structures = {
     0: (HermeVolum(2), ),
     1: (SplittedHermeVolume(50, 2), ),
@@ -158,9 +144,17 @@ structures = {
     ),
 
     3: (HeatExchanger(), ),
-    4: (HeatExchanger('liq_liq'), )
+    4: (HeatExchanger('liq_liq'), ),
+    5: (RadiationHeatExchanger(6), ),
+    6: (SplittedRadiationHeatExchanger(12, 6), ),
+    7: (HermeVolum(2), RadiationHeatExchanger(1),),
+    8: (SplittedHermeVolume(10, 2), SplittedRadiationHeatExchanger(10, 6),),
+    9: Multistructure()
 }
 
 plotter = Plotter.Plotter()
-generator = HeatGenerator.HeatGenerator()
+generator = (
+    HeatGenerator.HeatGenerator(tip='q_go'),
+    HeatGenerator.HeatGenerator(tip='q')
+)
 tests[test](structures[structure], plotter, generator)

@@ -6,36 +6,13 @@ import json
 import utils
 #condaenv_antonov
 
-# parameters = {}
-# parameters['inventor'] = 'False' # инвентирует подводимое тепло для каждого объекта структуры
-# parameters['input'] = 'True'      # есть ли вход? Если False - структура закольцована сама на себя
-# parameters['dt'] = 0.4
-# parameters['q_go'] = 0        # генерация тепла в начальный момент (после применения rule, этот параметр остаётся последним значением из rule)
-# parameters['speed'] = 1     # устарело
-# parameters['ws'] = 100      # сколько последних тактов отображать
-# parameters['t_max'] = -1
-# parameters['t_min'] = -1
-# parameters['rs'] = 1        # частокол по длине структуры
-# parameters['cs'] = 100      # частоокол по времени
-# parameters['loop'] = 'True'
-# parameters['rule'] = 'sin_1'  # sin_1, sin_2, sin_3, any
-
-# parameters['bias'] = 0
-# parameters['A'] = 3000
-# parameters['T'] = 8 # умножаем на 6 - получаем истинный период
-
-# parameters['A2'] = 1500 
-# parameters['T2'] = 3
-# parameters['A3'] = 900
-# parameters['T3'] = 1
-
 
 parameters_lock = threading.Lock()
 print_lock = threading.Lock()
 
 
-def calculation(structure, parameters):
-    calc = utils.calc_animated(structure)
+def calculation(structure, parameters, generator):
+    calc = utils.calc_animated(structure, generator)
     calc.send(None)
 
     while True:
@@ -75,7 +52,7 @@ def input_parameters(parameters):
                 sys.stdout.flush()
 
 
-def start(structure, parameters):
+def start(structure, parameters, generator):
     sys.stdout.write('\x1b[2J')  # Очищаем экран
     sys.stdout.write('\x1b[1;0H')  # Позиция для строки состояния
     sys.stdout.write('\n')  # Создаем место для ввода
@@ -84,7 +61,7 @@ def start(structure, parameters):
     calcul_thread.daemon = True
     calcul_thread.start()
 
-    calculation(structure, parameters)
+    calculation(structure, parameters, generator)
     
 
 

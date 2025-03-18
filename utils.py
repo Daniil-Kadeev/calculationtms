@@ -6,11 +6,10 @@ from HeatGenerator import HeatGenerator
 from HermeVolume import SplittedHermeVolume
 from Plotter import Plotter
 from support_class import Dummy, Flatten
+from multistruct import Multistructure
 
 
 def calc_step_d(structure, generator, params, deq):
-    params['q_go'] = generator.get_heat(params)
-
     if params['input'] == 'True':
         last = Dummy(structure[0])
     else:
@@ -29,17 +28,38 @@ def calc_step_t(structure):
 
 
 def calc(structure, generator, params, deq):
+    params['q_go'] = generator[0].get_heat(params)
+    params['q'] =generator[1].get_heat(params)
+
     calc_step_d(structure, generator, params, deq)
     calc_step_t(structure)
 
 
-def calc_animated(structure):
-    generator = HeatGenerator()
+def calc_order(structure, generator, params, deq):
+    calc(structure, generator, params, deq)
+    return structure
+
+
+def calc_multistruct(structure, generator, params, deq):
+    params['q_go'] = generator[0].get_heat(params)
+    params['q'] =generator[1].get_heat(params)
+    structure.step_d(params)
+    structure.step_t()
+    return structure.get_structure()
+
+
+def calc_animated(structure, generator):
     plotter = Plotter().animated_plot3d()
     plotter.send(None)
     deq = []
 
     t_list = [0, ]
+
+    funcs = {
+        tuple: calc_order,
+        Multistructure: calc_multistruct
+    }
+    func = funcs[type(structure)]
 
     while True:
         params = yield
@@ -47,7 +67,20 @@ def calc_animated(structure):
             time.sleep(2)
             continue
 
-        calc_step_d(structure, generator, params, deq)
-        calc_step_t(structure)
         t_list.append(t_list[-1] + params['dt'])
-        plotter.send((structure, t_list, params))
+        plotter.send((
+            func(structure, generator, params, deq),
+            t_list,
+            params
+        ))
+        # if type(structure) == tuple:
+        #     calc_step_d(structure, generator, params, deq)
+        #     calc_step_t(structure)
+        #     plotter.send((structure, t_list, params))
+        # else:
+        #     structure.step_d(params)
+        #     structure.step_t()
+        #     plotter.send((structure.get_structure(), t_list, params))
+
+
+# print((386.752 * 0.3 * (283.0 - 283.0) - 0.95 * 0.95 * 5.67e-08 * 283.0 ** 4 * 1.0 + 0.05 * 1083.3333333333333 * 1.0) / (2700 * 5))

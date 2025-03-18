@@ -3,6 +3,7 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 
+from HeatExchanger import HeatExchanger
 from BaseUnit import BaseUnit, SplittedBaseUnit
 from HermeVolume import HermeVolum, SplittedHermeVolume
 from support_class import Flatten
@@ -21,6 +22,9 @@ class Plotter():
             if issubclass(type(obj), SplittedBaseUnit):
                 for t in obj.get_last_t():
                     self.add_temperatures.append(t)
+            elif type(obj) == HeatExchanger:
+                for t in obj.get_last_t():
+                    self.add_temperatures.append(t)     
             elif issubclass(type(obj), BaseUnit):
                 self.add_temperatures.append(obj.get_last_t())
 
@@ -32,6 +36,10 @@ class Plotter():
                 count += obj.n
                 for t in obj.get_full_t():
                     self.temperature_data.append(t)
+            elif type(obj) == HeatExchanger:
+                count += 2
+                for t in obj.get_full_t():
+                    self.temperature_data.append(t)               
             elif issubclass(type(obj), BaseUnit):
                 count += 1
                 self.temperature_data.append(obj.get_full_t())
@@ -71,11 +79,19 @@ class Plotter():
             for t in self.flatten.start(temperature):
                 ax.plot(time, t)
 
-        if heat:
+        if type(heat[0]) != list and heat != None:
             ax2 = ax.twinx()
             ax2.plot(time, heat, color='red', linestyle='--', label='Heat')
             ax2.set_ylabel('\nHeat (W)', linespacing=2, color='red')
             ax2.tick_params(axis='y', labelcolor='red')
+        elif heat == None:
+            pass
+        else:
+            ax2 = ax.twinx()
+            for h in heat:
+                    ax2.plot(time, h, color='red', linestyle='--', label='Heat')
+                    ax2.set_ylabel('\nHeat (W)', linespacing=2, color='red')
+                    ax2.tick_params(axis='y', labelcolor='red')                
 
         ax.grid()
         plt.tight_layout()
@@ -95,9 +111,9 @@ class Plotter():
 
         display_data = self.temperature_data[:, start_idx:end_idx]
         display_time = time[start_idx:end_idx]
-
+        print(self.length.shape)
+        input()
         T, L = np.meshgrid(display_time, self.length)
-        print(params['cs'])
         surf = ax.plot_surface(
             T, L, display_data,
             cmap='plasma',
@@ -118,8 +134,9 @@ class Plotter():
         self.first = False
         self.temperature_data = []
         num_elements = self.get_num_elements(objects)
-        self.length = np.arange(num_elements)    
         self.temperature_data = self.from_list_into_array(self.temperature_data)
+        self.length = np.arange(num_elements)    
+
 
     
     def add_data(self, objects):

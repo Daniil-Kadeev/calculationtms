@@ -1,3 +1,5 @@
+from typing import List
+
 from BaseUnit import BaseUnit
 
 
@@ -62,7 +64,7 @@ class HeatExchanger(BaseUnit):
         self.dt_list_st = [0, ]
 
 
-    def step_d(self, t_in: float, params):
+    def step_d(self, t_in: List, params):
         self.dt = params['dt']
         self.t_in_hot, self.t_in_cold = t_in
 
