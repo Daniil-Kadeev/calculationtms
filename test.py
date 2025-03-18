@@ -124,6 +124,7 @@ def test_multistruct_2d(structure, plotter, generator):
         utils.calc_multistruct(structure, generator, parameters, deq)
         heat_q_go.append(parameters['q_go'])
         heat_q.append(parameters['q'])
+        
     heat_q_go.append(parameters['q_go'])
     heat_q.append(parameters['q'])
     structure.calc_print()

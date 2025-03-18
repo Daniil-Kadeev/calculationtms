@@ -99,7 +99,7 @@ class Multistructure():
         ]
         f = Flatten()
         data = f.start(data)
-        self.export_to_excel((title, data), 'out2.xlsx')
+        self.export_to_excel((title, data), 'out2.xlsx', step)
 
 
     def export_to_excel(self, tuple_data, filename, step=50):
