@@ -5,53 +5,51 @@ from BaseUnit import BaseUnit
 
 class HeatExchanger(BaseUnit):
     
-    def __init__(self, type_exchanger='gas_liq'):
-        self.init_temp = 283.0
+    def __init__(self, params, type_exchanger='gas_liq'):
+        self.init_temp = params['exchanger_init_temp']
 
-        # Параметры воздуха
         if type_exchanger == 'gas_liq':
-            self.start_gas_liq()
+            self.start_gas_liq(params)
         elif type_exchanger == 'liq_liq':
-            self.start_liq_liq()
+            self.start_liq_liq(params)
         else:
             raise Exception
  
-        # Параметры стенки
-        self.c_st = 2700
-        self.m_st = 5
+        self.c_st = params['exchanger_c_st']
+        self.m_st = params['exchanger_m_st']
         self.__init_start()
 
 
-    def start_gas_liq(self):
-        self.g_hot_main = 2.487
-        self.cp_hot = 1005
-        self.g_hot = 2.487
-        self.alfa_hot = 457.489
-        self.f_hot = 16.20183
-        self.m_hot = 2.487 
+    def start_gas_liq(self, params):
+        self.g_hot_main = params['gas_liq_exchanger_g_hot_main']
+        self.cp_hot = params['gas_liq_exchanger_cp_hot']
+        self.g_hot = params['gas_liq_exchanger_g_hot']
+        self.alfa_hot = params['gas_liq_exchanger_alfa_hot']
+        self.f_hot = params['gas_liq_exchanger_f_hot']
+        self.m_hot = params['gas_liq_exchanger_m_hot']
 
-        self.g_cold_main = 1.081
-        self.cp_cold = 1850
-        self.g_cold = 1.081
-        self.alfa_cold = 386.752
-        self.f_cold = 6.009
-        self.m_cold = 1.081 
+        self.g_cold_main = params['gas_liq_exchanger_g_cold_main']
+        self.cp_cold = params['gas_liq_exchanger_cp_cold']
+        self.g_cold = params['gas_liq_exchanger_g_cold']
+        self.alfa_cold = params['gas_liq_exchanger_alfa_cold']
+        self.f_cold = params['gas_liq_exchanger_f_cold']
+        self.m_cold = params['gas_liq_exchanger_m_cold']
 
 
-    def start_liq_liq(self):
-        self.g_hot_main = 1.081
-        self.cp_hot = 1850
-        self.g_hot = 1.081
-        self.alfa_hot = 386.752
-        self.f_hot = 6.009
-        self.m_hot = 0.93
+    def start_liq_liq(self, params):
+        self.g_hot_main = params['liq_liq_exchanger_g_hot_main']
+        self.cp_hot = params['liq_liq_exchanger_cp_hot']
+        self.g_hot = params['liq_liq_exchanger_g_hot']
+        self.alfa_hot = params['liq_liq_exchanger_alfa_hot']
+        self.f_hot = params['liq_liq_exchanger_f_hot']
+        self.m_hot = params['liq_liq_exchanger_m_hot']
 
-        self.g_cold_main = 1.081
-        self.cp_cold = 1850
-        self.g_cold = 1.081
-        self.alfa_cold = 386.752
-        self.f_cold = 6.009
-        self.m_cold = 0.93 
+        self.g_cold_main = params['liq_liq_exchanger_g_cold_main']
+        self.cp_cold = params['liq_liq_exchanger_cp_cold']
+        self.g_cold = params['liq_liq_exchanger_g_cold']
+        self.alfa_cold = params['liq_liq_exchanger_alfa_cold']
+        self.f_cold = params['liq_liq_exchanger_f_cold']
+        self.m_cold = params['liq_liq_exchanger_m_cold']
 
 
     def __init_start(self):
@@ -76,24 +74,15 @@ class HeatExchanger(BaseUnit):
         self.update_t(self.t_list_hot, self.dt_list_hot, self.dt)
         self.update_t(self.t_list_cold, self.dt_list_cold, self.dt)
         self.update_t(self.t_list_st, self.dt_list_st, self.dt)
-        # input((self.t_list_hot[-1], self.t_list_cold[-1], self.t_list_st[-1]))
 
     
     def equation_hot(self):
-        # print('liq hot')
-        # print((self.cp_hot * self.g_hot * (self.t_in_hot - self.t_list_hot[-1]) 
-        #         + self.alfa_hot * self.f_hot * (self.t_list_st[-1] - self.t_list_hot[-1])
-        #         ))
         return (self.cp_hot * self.g_hot * (self.t_in_hot - self.t_list_hot[-1]) 
                 + self.alfa_hot * self.f_hot * (self.t_list_st[-1] - self.t_list_hot[-1])
                 ) / (self.cp_hot * self.m_hot)
     
 
     def equation_cold(self):
-        # print('liq cold')
-        # print((self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
-        #         + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
-        #         ))
         return (self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
                 + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
                 ) / (self.cp_cold * self.m_cold)
@@ -103,6 +92,20 @@ class HeatExchanger(BaseUnit):
         return (self.alfa_hot * self.f_hot * (self.t_list_hot[-1] - self.t_list_st[-1]) 
                 + self.alfa_cold * self.f_cold * (self.t_list_cold[-1] - self.t_list_st[-1])
                 ) / (self.c_st * self.m_st)
+
+    
+    def calc_print(self):
+        print('exchanger')
+        print('hot')
+        print(f'({self.cp_hot} * {self.g_hot} * ({self.t_in_hot} - {self.t_list_hot[-1]}) + {self.alfa_hot} * {self.f_hot} * ({self.t_list_st[-1]} - {self.t_list_hot[-1]})) / ({self.cp_hot} * {self.m_hot})')
+        print((self.cp_hot * self.g_hot * (self.t_in_hot - self.t_list_hot[-1]) 
+                + self.alfa_hot * self.f_hot * (self.t_list_st[-1] - self.t_list_hot[-1])
+                ) / (self.cp_hot * self.m_hot))
+        print('cold')
+        print(f'({self.cp_cold} * {self.g_cold} * ({self.t_in_cold} - {self.t_list_cold[-1]}) + {self.alfa_cold} * {self.f_cold} * ({self.t_list_st[-1]} - {self.t_list_cold[-1]})) / ({self.cp_cold} * {self.m_cold})')
+        print((self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
+                + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
+                ) / (self.cp_cold * self.m_cold))
 
     
     def get_full_t(self):

@@ -11,17 +11,25 @@ from support_class import Flatten
 
 class Multistructure():
 
-    def __init__(self):
-        self.he = HermeVolum(4)
-        self.gl = HeatExchanger(type_exchanger='gas_liq')
-        self.gg = HeatExchanger(type_exchanger='liq_liq')
-        self.ro = RadiationHeatExchanger(10)
-        self.rg = Regulator()
+    def __init__(self, params):
+        self.he = HermeVolum(4, params)
+        self.gl = HeatExchanger(params, type_exchanger='gas_liq')
+        self.gg = HeatExchanger(params, type_exchanger='liq_liq')
+        self.ro = RadiationHeatExchanger(6, params)
+        self.rg = Regulator(params)
 
         self.flatten = (self.he, self.gl, self.gg, self.ro)
 
     
     def step_d(self, params):
+        self.he_out = self.he.get_out()
+        self.gl_out_air = self.gl.get_out()[0]
+        self.gl_out_liq = self.gl.get_out()[1]
+        self.gg_in_gl = self.gg.get_out()[0]
+        self.gg_in_ro = self.gg.get_out()[1]
+        self.ro_out = self.ro.get_out()
+
+
         self.he.step_d(self.gl.get_out()[0], params)
         self.gl.step_d(
             (self.he.get_out(), self.gg.get_out()[0]),
@@ -29,16 +37,15 @@ class Multistructure():
             )
 
         inp_gg = self.ro.get_out() * self.rg.get_out() + self.gg.get_out()[1] * (1 -self.rg.get_out())
-        # input((inp_gg, self.gg.get_out()[1], self.rg.get_out()))
         self.gg.step_d(
-            (self.gl.get_out()[1], self.ro.get_out()),
+            (self.gl.get_out()[1], inp_gg),
             params
         )
         self.rg.step_d(self.he.get_out(), params)
 
-        self.ro.g_cold = self.ro.g_cold_main * 1 #self.rg.get_out()
+        self.ro.g_cold = self.ro.g_cold_main * self.rg.get_out()
         self.ro.step_d(self.gg.get_out()[1], params)
-        # input()
+
 
 
     def step_t(self):
@@ -49,6 +56,12 @@ class Multistructure():
 
     def get_structure(self):
         return self.flatten
+
+
+    def calc_print(self):
+        for obj in self.flatten:
+            obj.calc_print()
+            print()
 
 
     def get_data_xls(self, heat, time, step):
@@ -99,14 +112,10 @@ class Multistructure():
                         - список списков с числовыми данными
         filename (str): Имя файла для сохранения (например, 'data.xlsx')
         """
-        # Создаем DataFrame из переданных данных
+
         data = np.array(tuple_data[1]).T
         sampled_data = data[::step]
         df = pd.DataFrame(sampled_data, columns=tuple_data[0])
-        print(df)
 
-    
-        
-        # Сохраняем в Excel
         df.to_excel(filename, index=False, engine='openpyxl')
         print(f"Данные успешно сохранены в файл {filename}")

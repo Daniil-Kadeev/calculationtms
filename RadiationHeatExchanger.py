@@ -2,28 +2,24 @@ from BaseUnit import BaseUnit, SplittedBaseUnit
 
 class RadiationHeatExchanger(BaseUnit):
     
-    def __init__(self, l):
-        self.init_temp = 283.0
-
-        self.g_cold_main = 1.081
-        self.cp_cold = 1850
-        self.g_cold = 1.081
-        self.t_cold_inp = 288
-        self.alfa_cold = 386.752
-        self.f_cold = 6.009
-        self.m_cold = 1.081 
-        self.f_st = 0.3
+    def __init__(self, l, params):
+        self.init_temp = params['rto_init_temp']
+        self.g_cold_main = params['rto_g_cold_main']
+        self.cp_cold = params['rto_cp_cold']
+        self.g_cold = params['rto_g_cold']
+        self.alfa_cold = params['rto_alfa_cold']
+        self.f_cold = params['rto_f_cold']
+        self.m_cold = params['rto_m_cold']
+        self.f_st = params['rto_f_cold']
+        self.etta = params['rto_etta']
+        self.eps = params['rto_eps']
+        self.sig = params['rto_sig']
+        self.a = params['rto_a']
+        self.c_st = params['rto_c_st']
+        self.m_st = params['rto_m_st']
 
         weidht = 1
-        self.etta = 0.95
-        self.eps = 0.95
-        self.sig = 5.67 * 10 ** -8
         self.f = weidht * l
-        self.a = 0.05
-
-        self.c_st = 2700
-        self.m_st = 5
-
         self.__init_start()
 
 
@@ -49,25 +45,29 @@ class RadiationHeatExchanger(BaseUnit):
 
     
     def equation_liq(self):
-        # print('rto')
-        # print((self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
-        #         + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
-        #         ))
         return (self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
                 + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
                 ) / (self.cp_cold * self.m_cold)
 
     
     def equation_st(self):
-        # print(f'({self.alfa_cold} * {self.f_st} * ({self.t_list_cold[-1]} - {self.t_list_st[-1]}) - {self.etta} * {self.eps} * {self.sig} * {self.t_list_st[-1]} ** 4 * {self.f} + {self.a} * {self.q} * {self.f}) / ({self.c_st} * {self.m_st})')
-        # print(((self.alfa_cold * self.f_st * (self.t_list_cold[-1] - self.t_list_st[-1]) - 
-        # self.etta * self.eps * self.sig * self.t_list_st[-1] ** 4 * self.f + 
-        # self.a * self.q * self.f) ))
-        
         return (self.alfa_cold * self.f_st * (self.t_list_cold[-1] - self.t_list_st[-1]) - 
         self.etta * self.eps * self.sig * self.t_list_st[-1] ** 4 * self.f + 
         self.a * self.q * self.f) / (self.c_st * self.m_st)
-    
+
+
+    def calc_print(self):
+        print('RTO')
+        print('liq')
+        print(f'({self.cp_cold} * {self.g_cold} * ({self.t_in_cold} - {self.t_list_cold[-1]}) + {self.alfa_cold} * {self.f_cold} * ({self.t_list_st[-1]} - {self.t_list_cold[-1]})) / ({self.cp_cold} * {self.m_cold})')
+        print((self.cp_cold * self.g_cold * (self.t_in_cold - self.t_list_cold[-1]) 
+                + self.alfa_cold * self.f_cold * (self.t_list_st[-1] - self.t_list_cold[-1])
+                ) / (self.cp_cold * self.m_cold))    
+        print('st')
+        print(f'({self.alfa_cold} * {self.f_st} * ({self.t_list_cold[-1]} - {self.t_list_st[-1]}) - {self.etta} * {self.eps} * {self.sig} * {self.t_list_st[-1]} ** 4 * {self.f} + {self.a} * {self.q} * {self.f}) / ({self.c_st} * {self.m_st})')
+        print((self.alfa_cold * self.f_st * (self.t_list_cold[-1] - self.t_list_st[-1]) - 
+        self.etta * self.eps * self.sig * self.t_list_st[-1] ** 4 * self.f + 
+        self.a * self.q * self.f) / (self.c_st * self.m_st))
 
     def get_full_t(self):
         return self.t_list_cold
@@ -84,8 +84,8 @@ class RadiationHeatExchanger(BaseUnit):
 
 class SplittedRadiationHeatExchanger(SplittedBaseUnit):
 
-    def __init__(self, n: int, l):
-        self.objs = [RadiationHeatExchanger(l / n) for _ in range(n)]
+    def __init__(self, n: int, l, params):
+        self.objs = [RadiationHeatExchanger(l / n, params) for _ in range(n)]
         for obj in self.objs:
             obj.m_st /= n
         self.n = n

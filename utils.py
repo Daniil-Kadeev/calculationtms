@@ -9,6 +9,7 @@ from support_class import Dummy, Flatten
 from multistruct import Multistructure
 
 
+
 def calc_step_d(structure, generator, params, deq):
     if params['input'] == 'True':
         last = Dummy(structure[0])
@@ -29,7 +30,7 @@ def calc_step_t(structure):
 
 def calc(structure, generator, params, deq):
     params['q_go'] = generator[0].get_heat(params)
-    params['q'] =generator[1].get_heat(params)
+    params['q'] = generator[1].get_heat(params)
 
     calc_step_d(structure, generator, params, deq)
     calc_step_t(structure)

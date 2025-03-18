@@ -5,14 +5,14 @@ from BaseUnit import BaseUnit, SplittedBaseUnit
 
 class HermeVolum(BaseUnit):
 
-    def __init__(self, l):
-        self.init_temp = 283.0
-        g = 2.487
-        ro_air = 1.2
-        cp_air = 1005 
-        alfa = 200
-        r = 1.5
-        delta = 1/1000
+    def __init__(self, l, params):
+        self.init_temp = params['herme_init_temp']
+        g = params['herme_g']
+        ro_air = params['herme_ro_air']
+        cp_air = params['herme_cp_air']
+        alfa = params['herme_alfa']
+        r = params['herme_r']
+        delta = params['herme_delta']
 
         self.alfa = alfa
         self.f = math.pi * r * l
@@ -43,19 +43,19 @@ class HermeVolum(BaseUnit):
         self.update_t(self.t_list_air, self.dt_list_air, self.dt)
         self.update_t(self.t_list_st, self.dt_list_st, self.dt)
 
-        # print('herme')
-        # print(self.t_list_air[-1])
-
     
     def equation_air(self):
-        # print('Herme')
-        # print((self.alfa * self.f * (self.t_list_st[-1] - self.t_list_air[-1]) + 
-        # self.CpG_air * (self.t_in - self.t_list_air[-1]) + self.q))
-
         return (self.alfa * self.f * (self.t_list_st[-1] - self.t_list_air[-1]) + 
         self.CpG_air * (self.t_in - self.t_list_air[-1]) + self.q) / self.cm_air
 
-    
+
+    def calc_print(self):
+        print('Herme')
+        print(f'({self.alfa} * {self.f} * ({self.t_list_st[-1]} - {self.t_list_air[-1]}) + {self.CpG_air} * ({self.t_in} - {self.t_list_air[-1]}) + {self.q}) / {self.cm_air}')
+        print((self.alfa * self.f * (self.t_list_st[-1] - self.t_list_air[-1]) + 
+        self.CpG_air * (self.t_in - self.t_list_air[-1]) + self.q) / self.cm_air)
+
+
     def equation_st(self):
         return (self.alfa * self.f * (self.t_list_air[-1] - self.t_list_st[-1])) / self.cm_st
     
@@ -75,8 +75,8 @@ class HermeVolum(BaseUnit):
 
 class SplittedHermeVolume(SplittedBaseUnit):
 
-    def __init__(self, n: int, l):
-        self.objs = [HermeVolum(l / n) for _ in range(n)]
+    def __init__(self, n: int, l, params):
+        self.objs = [HermeVolum(l / n, params) for _ in range(n)]
         self.n = n
 
 
